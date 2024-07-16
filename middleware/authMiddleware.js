@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const Agent = require('../models/Agent');
-const Admin = require('../models/Admin');
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -11,22 +9,8 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    if (!token) {
-      return res.status(401).json({ message: 'No token, authorization denied' });
-    }
-
-    const decoded = jwt.verify(token, 'secret');
-    if (!decoded) {
-      return res.status(401).json({ message: 'Token is not valid' });
-    }
-
-    let user = await User.findById(decoded.id).select('-pin');
-    if (!user) {
-      user = await Agent.findById(decoded.id).select('-pin');
-    }
-    if (!user) {
-      user = await Admin.findById(decoded.id).select('-pin');
-    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-pin');
 
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
@@ -35,7 +19,6 @@ const authMiddleware = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    console.error(err);
     res.status(401).json({ message: 'Token is not valid' });
   }
 };
