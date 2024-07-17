@@ -8,6 +8,7 @@ const userRoutes = require('./routes/userRoutes');
 const agentRoutes = require('./routes/agentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const authMiddleware = require('./middleware/authMiddleware');
+const Admin = require('./models/Admin');
 
 const app = express();
 app.use(bodyParser.json());
@@ -26,11 +27,12 @@ const corsOptions = {
   credentials: true,
 };
 
+
 app.use(cors(corsOptions));
 
 app.use('/api/users', userRoutes);
 app.use('/api/agents', agentRoutes);
-app.use('/api/admin', userRoutes);
+app.use('/api/admins', adminRoutes);
 
 app.use(authMiddleware);
 

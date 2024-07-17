@@ -1,4 +1,3 @@
-// routes/adminRoutes.js
 const express = require('express');
 const Admin = require('../models/Admin');
 const User = require('../models/User');
@@ -9,23 +8,33 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Admin Registration (for initial setup)
-router.post('/register', async (req, res) => {
-  const { name, pin, mobileNumber, email } = req.body;
-  const admin = new Admin({ name, pin, mobileNumber, email });
-  await admin.save();
-  res.status(201).json({ message: 'Admin registered successfully' });
-});
-
 // Admin Login
 router.post('/login', async (req, res) => {
   const { mobileNumber, email, pin } = req.body;
-  const admin = await Admin.findOne({ $or: [{ mobileNumber }, { email }] });
-  if (admin && (await admin.matchPin(pin))) {
-    const token = jwt.sign({ id: admin._id }, 'secret', { expiresIn: '1h' });
+  
+  try {
+    // Find admin by mobile number or email
+    const admin = await Admin.findOne({ $or: [{ mobileNumber }, { email }] });
+
+    if (!admin) {
+      return res.status(401).json({ message: 'Admin not found' });
+    }
+
+    // Validate PIN
+    const isPinValid = await admin.matchPin(pin);
+
+    if (!isPinValid) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
     res.json({ token });
-  } else {
-    res.status(401).json({ message: 'Invalid credentials' });
+
+  } catch (error) {
+    console.error('Error during admin login:', error);
+    res.status(500).json({ message: 'Server error during login' });
   }
 });
 
