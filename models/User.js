@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   mobileNumber: String,
   email: String,
   status: { type: String, default: 'pending' },
-  balance: { type: Number, default: 0 },
+  balance: { type: Number, default: 40 },
   transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' }]
 });
 

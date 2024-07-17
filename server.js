@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const userRoutes = require('./routes/userRoutes');
+const agentRoutes = require('./routes/agentRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const authMiddleware = require('./middleware/authMiddleware');
 
 const app = express();
@@ -27,6 +29,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use('/api/users', userRoutes);
+app.use('/api/agents', agentRoutes);
+app.use('/api/admin', userRoutes);
 
 app.use(authMiddleware);
 
